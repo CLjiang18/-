@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chen.dao.RentinfoMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.chen.pojo.Rentinfo">
+                    <id column="id" property="id"/>
+                    <result column="houses_id" property="housesId"/>
+                    <result column="customer_id" property="customerId"/>
+                    <result column="contract_id" property="contractId"/>
+                    <result column="address" property="address"/>
+                    <result column="remarks" property="remarks"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="djr" property="djr"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="xgr" property="xgr"/>
+                    <result column="status" property="status"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, houses_id, customer_id, contract_id, address, remarks, create_time, djr, update_time, xgr, status
+        </sql>
+    <resultMap id="queryRentInfoALLMap" type="com.chen.pojo.Rentinfo" extends="BaseResultMap">
+        <association property="customer" javaType="com.chen.pojo.Customer">
+            <id column="id" property="id"></id>
+            <result column="identity" property="identity"/>
+            <result column="custname" property="custname"/>
+            <result column="phone" property="phone"/>
+        </association>
+        <association property="houses" javaType="com.chen.pojo.Houses">
+            <id column="id" property="id"></id>
+            <result column="numbers" property="numbers"/>
+            <result column="address" property="address"/>
+        </association>
+        <association property="contract" javaType="com.chen.pojo.Contract">
+            <id column="id" property="id"></id>
+            <result column="money" property="money"/>
+        </association>
+    </resultMap>
+        <select id="queryRentInfoALL" parameterType="com.chen.pojo.Rentinfo" resultMap="queryRentInfoALLMap">
+            select info.address,
+                   info.id,
+                   info.contract_id,
+                   h.numbers,
+                   c.custname,
+                   c.phone,
+                   c.identity,
+                   c2.money,
+                   h.status from rentinfo info
+                left join houses h on info.houses_id = h.id
+                left join customer c on info.customer_id = c.id
+                left join contract c2 on info.contract_id = c2.id
+            <where>
+                <if test="customer!=null">
+                    <if test="customer.identity!=null and customer.identity!=''">
+                        and c.identity like '%${customer.identity}%'
+                    </if>
+                </if>
+                <if test="houses!=null">
+                    <if test="houses.numbers!=null and houses.numbers!=''">
+                        and h.numbers like '%${houses.numbers}%'
+                    </if>
+                </if>
+                <if test="customerId!=null and customerId!=''">
+                    and info.customer_id =#{customerId}
+                </if>
+            </where>
+        </select>
+    <select id="queryByHId" parameterType="int" resultType="com.chen.pojo.Rentinfo">
+        select * from rentinfo where houses_id = #{id}
+    </select>
+
+</mapper>

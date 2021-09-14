@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yanzhen.dao.OwnerMapper">
+
+   <select id="queryOwnerAll" resultType="com.yanzhen.model.Owner" parameterType="com.yanzhen.model.Owner">
+       select * from owner
+       <where>
+           <if test="identity!=null and identity!=''">
+                and identity like '%${identity}%'
+           </if>
+           <if test="custname!=null and custname!=''">
+               and custname like '%${custname}%'
+           </if>
+       </where>
+   </select>
+
+</mapper>

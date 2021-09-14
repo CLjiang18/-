@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yanzhen.dao.RentalsMapper">
+
+
+        <!-- 通用查询结果列 -->
+
+
+    <select id="queryList" parameterType="com.yanzhen.model.RentalsVo" resultType="com.yanzhen.model.RentalsVo">
+        SELECT
+            tals.* ,custname,cus.phone,cus.identity,hou.numbers,hou.address
+        FROM
+            rentals tals,
+            houses hou,
+            customer cus
+        WHERE
+            hou.id = tals.houses_id
+        AND hou.`status` = 1
+        AND cus.id = tals.customer_id
+        <if test="numbers!=null and numbers!=''">
+             and numbers like '%${numbers}%'
+        </if>
+        <if test="custname!=null and custname!=''">
+            and custname like '%${custname}%'
+        </if>
+        <if test="customerId!=null ">
+            and customer_id =#{customerId}
+        </if>
+    </select>
+
+
+    <select id="queryCount" resultType="com.yanzhen.model.TongJi">
+        SELECT
+	            sum(money) counts,
+               MONTH  (date) months
+        FROM
+            rentals
+        where YEAR(date)=YEAR(NOW())
+        GROUP BY
+            MONTH (date)
+        ORDER BY
+            MONTH  (date) DESC
+    </select>
+</mapper>

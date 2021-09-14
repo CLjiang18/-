@@ -1,0 +1,173 @@
+<style>
+    .top-panel {border:1px solid #eceff9;border-radius:5px;text-align:center;}
+    .top-panel > .layui-card-body {height:60px;}
+    .top-panel-number {line-height:60px;font-size:30px;border-right:1px solid #eceff9;}
+    .top-panel-tips {line-height:30px;font-size:12px}
+</style>
+<div class="layuimini-container layuimini-page-anim">
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs12 layui-col-md12">
+                <div id="echarts-records" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+            </div>
+        </div>
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs12 layui-col-md12">
+                <div id="echarts-dataset" style="background-color:#ffffff;min-height:300px;padding: 10px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['layer','echarts'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts;
+        /**
+         * 报表功能
+         */
+        $.ajax({
+            url: 'http://localhost:1234/rentals/queryTongji',
+            dataType: 'json',
+            type: 'post',
+            success: function (data) {
+                var str="";
+                var str2="";
+                for(var p in data){//遍历json数组时，这么写p为索引，0,1
+                    str=str+data[p].months + ","
+                }
+                str= str.substring(0,str.length-1);
+                console.log(str)
+                for(var p in data){//遍历json数组时，这么写p为索引，0,1
+                    str2=str2+data[p].counts + ","
+                }
+                str2= str2.substring(0,str2.length-1);
+                var stringResult = str.split(',');
+                var stringResult2 = str2.split(',');
+                console.log(str2)
+
+                // console.log(datas);
+                // test(stringResult,stringResult2);
+                var echartsRecords = echarts.init(document.getElementById('echarts-dataset'), 'walden');
+
+                var optionRecords = {
+                    title: {
+                        text: '指标名称-报表图'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: stringResult
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '交租信息',
+                            type: 'line',
+                            stack: '总量',
+                            label: {
+                                normal: {
+                                    show: true,
+                                    position: 'top'
+                                }
+                            },
+                            areaStyle: {},
+                            data: stringResult2
+                        }
+                    ]
+                };
+                echartsRecords.setOption(optionRecords);
+
+
+               //遍历对象并且改名称
+                for(var p in data) {//遍历json数组时，这么写p为索引，0,1
+                    for (var j in data[p]) {
+                        if (j == 'months') {
+                            data[p]['name'] = data[p][j]//修改属性名为“title”
+                            delete data[p]['months']//删除“name”
+                        }
+                        if (j == 'counts') {
+                            data[p]['value'] = data[p][j]//修改属性名为“title”
+                            delete data[p]['counts']//删除“name”
+                        }
+                    }
+
+                }
+                console.log(data)
+                //数组转json对象
+                data2=JSON.stringify( data );
+                //将json字符串转json
+                typeof(data2);
+                /**
+                     * 玫瑰图表
+                     */
+                    var echartsPies = echarts.init(document.getElementById('echarts-records'), 'walden');
+                      // data2=JSON.stringify( data );
+                    var optionPies = {
+                        title: {
+                            text: '指标名称-玫瑰图',
+                            left: 'center'
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b} : {c} ({d}%)'
+                        },
+                        series: [
+                            {
+                                name: '访问来源',
+                                type: 'pie',
+                                radius: '55%',
+                                center: ['50%', '60%'],
+                                roseType: 'radius',
+                                data: JSON.parse(data2),//JSON.stringify(data),
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                }
+                            }
+                        ]
+                    };
+                    echartsPies.setOption(optionPies);
+                }
+
+
+        });
+
+
+
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
+
+    });
+</script>

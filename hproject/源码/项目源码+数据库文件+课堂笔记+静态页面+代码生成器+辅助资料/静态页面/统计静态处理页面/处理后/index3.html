@@ -1,0 +1,74 @@
+<style>
+    .top-panel {border:1px solid #eceff9;border-radius:5px;text-align:center;}
+    .top-panel > .layui-card-body {height:60px;}
+    .top-panel-number {line-height:60px;font-size:30px;border-right:1px solid #eceff9;}
+    .top-panel-tips {line-height:30px;font-size:12px}
+</style>
+<div class="layuimini-container layuimini-page-anim">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs12 layui-col-md12">
+                <div id="echarts-controller" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['layer','echarts'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts;
+        /**
+         * 柱状图
+         */
+        $.ajax({
+                    url: 'http://localhost:1234/repair/queryTongji',
+                    dataType: 'json',
+                    type: 'post',
+                    success: function (data) {
+                        // debugger
+                        console.log(data);
+                        var str="";
+                        var str2="";
+                        for(var p in data){//遍历json数组时，这么写p为索引，0,1
+                            str=str+data[p].months + ","
+                        }
+                        str= str.substring(0,str.length-1);
+                        console.log(str)
+                        for(var p in data){//遍历json数组时，这么写p为索引，0,1
+                            str2=str2+data[p].counts + ","
+                        }
+                        str2= str2.substring(0,str2.length-1);
+                        var stringResult = str.split(',');
+                        var stringResult2 = str2.split(',');
+                        var dom = document.getElementById("echarts-controller");
+                        var myChart = echarts.init(dom);
+                        option = null;
+                        var app = {};
+                        option = {
+                            xAxis: {
+                                type: 'category',
+                                data:stringResult
+                            },
+                            yAxis: {
+                                type: 'value'
+                            },
+                            series: [{
+                                data: stringResult2,
+                                type: 'bar',
+                                showBackground: true,
+                                backgroundStyle: {
+                                    color: 'rgba(220, 220, 220, 0.8)'
+                                }
+                            }]
+                        };
+                        myChart.setOption(option, true);
+                    }
+                });
+
+        //适应页面
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
+
+    });
+</script>
